@@ -1,4 +1,5 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require("electron");
+const { app, BrowserWindow, globalShortcut, ipcMain, session } = require("electron");
+
 const {
   settings,
   store,
@@ -10,7 +11,7 @@ const {
 const { addTray, refreshTray } = require("./scripts/tray");
 const { addMenu } = require("./scripts/menu");
 const path = require("path");
-const tidalUrl = "https://listen.tidal.com";
+const tidalUrl = "https://listen.tidal.com/";
 const expressModule = require("./scripts/express");
 const mediaKeys = require("./constants/mediaKeys");
 const mediaInfoModule = require("./scripts/mediaInfo");
@@ -29,6 +30,7 @@ if (!app.isPackaged) {
   });
 }
 
+
 function createWindow(options = {}) {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -46,6 +48,11 @@ function createWindow(options = {}) {
       devTools: true, // I like tinkering, others might too
       enableRemoteModule: true,
     },
+  });
+
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36';
+    callback({ cancel: false, requestHeaders: details.requestHeaders });
   });
 
   mainWindow.setMenuBarVisibility(store.get(settings.menuBar));
